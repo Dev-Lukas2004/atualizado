@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfil do Usuário</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
+
+    <!-- Header -->
+    <div class="flex items-center space-x-6">
+      <!-- Foto -->
+      <div class="relative">
+        <img id="profilePhoto" src="https://via.placeholder.com/100" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md" />
+        <label for="uploadPhoto" class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-1 cursor-pointer hover:bg-blue-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </label>
+        <input type="file" id="uploadPhoto" accept="image/*" class="hidden" />
+      </div>
+
+      <!-- Nome e plano -->
+      <div>
+        <input id="name" class="text-2xl font-bold border-b focus:outline-none focus:border-blue-500" value="João Silva" />
+        <p class="text-sm text-gray-500 mt-1">Plano: <span class="font-medium">Premium</span></p>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <form class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+      <!-- Coluna 1 -->
+      <div class="space-y-4">
+        <div>
+          <label class="font-medium">E-mail</label>
+          <input type="email" id="email" value="joao@email.com" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="font-medium">Telefone</label>
+          <input type="tel" id="phone" value="(11) 91234-5678" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="font-medium">Data de Nascimento</label>
+          <input type="date" id="birth" value="1995-05-10" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+      </div>
+
+      <!-- Coluna 2 -->
+      <div class="space-y-4">
+        <div>
+          <label class="font-medium">Endereço</label>
+          <input type="text" id="address" value="Rua Exemplo, 123" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="font-medium">Cidade</label>
+          <input type="text" id="city" value="São Paulo" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="font-medium">CEP</label>
+          <input type="text" id="cep" value="01234-567" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+      </div>
+    </form>
+
+    <!-- Botões -->
+    <div class="mt-8 flex justify-between">
+      <a href="javascript:history.back()" class="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Voltar
+      </a>
+      <button onclick="salvarPerfil()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Salvar Alterações</button>
+    </div>
+
+  </div>
