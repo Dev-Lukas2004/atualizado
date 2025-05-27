@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Perfil do Usuário</title>
+  <title>Editar Perfil</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -31,20 +31,20 @@
     </div>
 
     <!-- Formulário -->
-    <form class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+    <form id="profileForm" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm" onsubmit="event.preventDefault(); salvarPerfil();">
       <!-- Coluna 1 -->
       <div class="space-y-4">
         <div>
           <label class="font-medium">E-mail</label>
-          <input type="email" id="email" value="joao@email.com" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="email" id="email" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="joao@email.com" />
         </div>
         <div>
           <label class="font-medium">Telefone</label>
-          <input type="tel" id="phone" value="(11) 91234-5678" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="tel" id="phone" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="(11) 91234-5678" />
         </div>
         <div>
           <label class="font-medium">Data de Nascimento</label>
-          <input type="date" id="birth" value="1995-05-10" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="date" id="birth" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="1995-05-10" />
         </div>
       </div>
 
@@ -52,15 +52,15 @@
       <div class="space-y-4">
         <div>
           <label class="font-medium">Endereço</label>
-          <input type="text" id="address" value="Rua Exemplo, 123" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="text" id="address" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="Rua Exemplo, 123" />
         </div>
         <div>
           <label class="font-medium">Cidade</label>
-          <input type="text" id="city" value="São Paulo" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="text" id="city" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="São Paulo" />
         </div>
         <div>
           <label class="font-medium">CEP</label>
-          <input type="text" id="cep" value="01234-567" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="text" id="cep" class="w-full mt-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value="01234-567" />
         </div>
       </div>
     </form>
@@ -77,3 +77,56 @@
     </div>
 
   </div>
+
+  <script>
+    const uploadPhoto = document.getElementById("uploadPhoto");
+    const profilePhoto = document.getElementById("profilePhoto");
+
+    uploadPhoto.addEventListener("change", () => {
+      const file = uploadPhoto.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          profilePhoto.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function salvarPerfil() {
+      const data = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        birth: document.getElementById("birth").value,
+        address: document.getElementById("address").value,
+        city: document.getElementById("city").value,
+        cep: document.getElementById("cep").value,
+        photo: profilePhoto.src
+      };
+
+      localStorage.setItem("userProfile", JSON.stringify(data));
+      alert("Perfil salvo com sucesso!");
+    }
+
+    // Carregar dados ao abrir a página
+    window.onload = () => {
+      const saved = localStorage.getItem("userProfile");
+      if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById("name").value = data.name;
+        document.getElementById("email").value = data.email;
+        document.getElementById("phone").value = data.phone;
+        document.getElementById("birth").value = data.birth;
+        document.getElementById("address").value = data.address;
+        document.getElementById("city").value = data.city;
+        document.getElementById("cep").value = data.cep;
+        if (data.photo) {
+          profilePhoto.src = data.photo;
+        }
+      }
+    };
+  </script>
+
+</body>
+</html>

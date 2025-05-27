@@ -700,3 +700,9 @@ document.addEventListener('click', function (e) {
       dropdown.classList.add('hidden');
   }
 });
+const fotoPerfil = document.getElementById("fotoPerfil");
+if (dados.photo && dados.photo.trim() !== "") {
+  fotoPerfil.src = dados.photo;
+} else {
+  fotoPerfil.src = "https://via.placeholder.com/100"; // Imagem padrão
+}

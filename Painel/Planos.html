@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sistema de Planos Interativo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .plano-selecionado {
+      border-color: #2563eb; /* azul-600 */
+      background-color: #bfdbfe; /* azul-200 */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center justify-center p-6">
+
+  <div class="max-w-3xl w-full bg-white rounded-xl shadow-md p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center">Escolha seu Plano</h1>
+
+    <!-- Toggle Mensal / Anual -->
+    <div class="flex justify-center items-center mb-6 space-x-4 font-semibold select-none">
+      <span id="labelMensal" class="transition-colors duration-300 cursor-pointer text-blue-600">Mensal</span>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="togglePlano" class="sr-only" />
+        <div class="w-14 h-7 bg-gray-300 rounded-full peer
+                    peer-checked:bg-blue-600 transition-colors duration-300"></div>
+        <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow-md
+                    transition-transform duration-300 peer-checked:translate-x-7"></div>
+      </label>
+      <span id="labelAnual" class="transition-colors duration-300 cursor-pointer text-gray-500">Anual (10% off)</span>
+    </div>
+
+    <div id="planos" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Planos renderizados aqui -->
+    </div>
+
+    <!-- Confirmar seleção -->
+    <div class="mt-8 text-center">
+      <button id="btnConfirmar" disabled
+        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+        Confirmar Plano
+      </button>
+    </div>
+
+    <!-- Exibe plano atual -->
+    <div id="planoSelecionado" class="mt-8 p-4 bg-blue-50 border border-blue-300 rounded-md text-center hidden">
+      <h2 class="text-xl font-semibold">Plano Atual:</h2>
+      <p class="mt-2" id="planoAtualNome"></p>
+      <p class="text-gray-600 mt-1" id="planoAtualBeneficios"></p>
+      <p class="text-gray-600 mt-1 font-medium" id="planoAtualPeriodo"></p>
+    </div>
+  </div>
+
+  <script>
+    const planos = [
+      {
+        id: "free",
+        nome: "Free",
+        precoMensal: 0,
+        beneficios: [
+          "Acesso limitado",
+          "Suporte via e-mail",
+          "1 projeto ativo"
+        ]
+      },
+      {
+        id: "premium",
+        nome: "Premium",
+        precoMensal: 29.9,
+        beneficios: [
+          "Acesso ilimitado",
+          "Suporte prioritário",
+          "Projetos ilimitados",
+          "Relatórios avançados"
+        ]
+      },
+      {
+        id: "pro",
+        nome: "Pro",
+        precoMensal: 59.9,
+        beneficios: [
+          "Tudo do Premium",
+          "Consultoria personalizada",
+          "Integrações exclusivas",
+          "Acesso antecipado a novidades"
+        ]
+      }
+    ];
+
+    const planosContainer = document.getElementById("planos");
+    const btnConfirmar = document.getElementById("btnConfirmar");
+    const togglePlano = document.getElementById("togglePlano");
+    const labelMensal = document.getElementById("labelMensal");
+    const labelAnual = document.getElementById("labelAnual");
+
+    let planoSelecionadoId = null;
+    let planoAnual = false;
+
+    // Formata preço para real, exibindo "Gratuito" para 0
+    function formatarPreco(valor) {
+      if (valor === 0) return "Gratuito";
+      return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    // Calcula preço anual com 10% de desconto sobre 12 meses
+    function precoAnual(mensal) {
+      return mensal * 12 * 0.9;
+    }
+
+    // Renderiza os cards de planos, destacando o selecionado
+    function mostrarPlanos() {
+      planosContainer.innerHTML = "";
+      planos.forEach(plano => {
+        const preco = planoAnual
+          ? formatarPreco(precoAnual(plano.precoMensal)) + " / ano"
+          : formatarPreco(plano.precoMensal) + " / mês";
+
+        const card = document.createElement("div");
+        card.className = `border rounded-lg p-6 flex flex-col justify-between cursor-pointer transition
+          hover:shadow-lg
+          ${planoSelecionadoId === plano.id ? "plano-selecionado" : "border-gray-300 bg-white"}`;
+
+        card.innerHTML = `
+          <h3 class="text-xl font-semibold mb-2">${plano.nome}</h3>
+          <p class="text-gray-700 font-medium mb-4">${preco}</p>
+          <ul class="mb-4 list-disc list-inside text-sm space-y-1 text-gray-600">
+            ${plano.beneficios.map(b => `<li>${b}</li>`).join("")}
+          </ul>
+        `;
+
+        card.onclick = () => {
+          planoSelecionadoId = plano.id;
+          btnConfirmar.disabled = false;
+          mostrarPlanos();
+        };
+
+        planosContainer.appendChild(card);
+      });
+    }
+
+    // Exibe o plano salvo no localStorage
+    function mostrarPlanoAtual() {
+      const planoSalvo = localStorage.getItem("planoUsuario");
+      if (!planoSalvo) {
+        document.getElementById("planoSelecionado").style.display = "none";
+        return;
+      }
+
+      const plano = JSON.parse(planoSalvo);
+      document.getElementById("planoSelecionado").style.display = "block";
+      document.getElementById("planoAtualNome").textContent = `${plano.nome} — ${plano.preco}`;
+      document.getElementById("planoAtualBeneficios").innerHTML = plano.beneficios.map(b => `• ${b}`).join("<br>");
+      document.getElementById("planoAtualPeriodo").textContent = `Período: ${plano.periodo}`;
+    }
+
+    // Salva plano no localStorage após confirmação
+    btnConfirmar.onclick = () => {
+      if (!planoSelecionadoId) return;
+
+      const plano = planos.find(p => p.id === planoSelecionadoId);
+      if (!plano) return alert("Plano inválido!");
+
+      const preco = planoAnual
+        ? formatarPreco(precoAnual(plano.precoMensal)) + " / ano"
+        : formatarPreco(plano.precoMensal) + " / mês";
+
+      const dadosSalvar = {
+        id: plano.id,
+        nome: plano.nome,
+        beneficios: plano.beneficios,
+        preco: preco,
+        periodo: planoAnual ? "Anual (10% off)" : "Mensal"
+      };
+
+      localStorage.setItem("planoUsuario", JSON.stringify(dadosSalvar));
+      mostrarPlanoAtual();
+      alert(`Plano "${plano.nome}" selecionado com sucesso.`);
+    };
+
+    // Atualiza UI do toggle e cores dos labels
+    function atualizarToggleUI() {
+      planoAnual = togglePlano.checked;
+      planoSelecionadoId = null;
+      btnConfirmar.disabled = true;
+      mostrarPlanos();
+
+      if (planoAnual) {
+        labelAnual.classList.add('text-blue-600');
+        labelAnual.classList.remove('text-gray-500');
+        labelMensal.classList.remove('text-blue-600');
+        labelMensal.classList.add('text-gray-500');
+      } else {
+        labelMensal.classList.add('text-blue-600');
+        labelMensal.classList.remove('text-gray-500');
+        labelAnual.classList.remove('text-blue-600');
+        labelAnual.classList.add('text-gray-500');
+      }
+    }
+
+    togglePlano.addEventListener('change', atualizarToggleUI);
+
+    labelMensal.addEventListener('click', () => {
+      if (togglePlano.checked) {
+        togglePlano.checked = false;
+        togglePlano.dispatchEvent(new Event('change'));
+      }
+    });
+
+    labelAnual.addEventListener('click', () => {
+      if (!togglePlano.checked) {
+        togglePlano.checked = true;
+        togglePlano.dispatchEvent(new Event('change'));
+      }
+    });
+
+    // Inicializa UI
+    mostrarPlanos();
+    mostrarPlanoAtual();
+    atualizarToggleUI();
+  </script>
+
+</body>
+</html>
