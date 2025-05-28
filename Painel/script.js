@@ -705,4 +705,4 @@ if (dados.photo && dados.photo.trim() !== "") {
   fotoPerfil.src = dados.photo;
 } else {
   fotoPerfil.src = "https://via.placeholder.com/100"; // Imagem padrão
-}
+};

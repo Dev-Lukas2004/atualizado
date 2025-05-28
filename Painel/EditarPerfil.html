@@ -103,10 +103,13 @@
         city: document.getElementById("city").value,
         cep: document.getElementById("cep").value,
         photo: profilePhoto.src
+        
       };
 
       localStorage.setItem("userProfile", JSON.stringify(data));
       alert("Perfil salvo com sucesso!");
+       // Opcional: Forçar o evento storage na mesma aba para disparar atualização local
+      window.dispatchEvent(new Event('storage'));
     }
 
     // Carregar dados ao abrir a página

@@ -15,20 +15,28 @@
 <body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center justify-center p-6">
 
   <div class="max-w-3xl w-full bg-white rounded-xl shadow-md p-6">
+    <!-- Ícone de Voltar -->
+<div class="mb-4">
+  <button onclick="window.location.href='ResumoGeral.html'" class="text-blue-600 hover:text-blue-800">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+</div>
     <h1 class="text-3xl font-bold mb-6 text-center">Escolha seu Plano</h1>
 
-    <!-- Toggle Mensal / Anual -->
-    <div class="flex justify-center items-center mb-6 space-x-4 font-semibold select-none">
-      <span id="labelMensal" class="transition-colors duration-300 cursor-pointer text-blue-600">Mensal</span>
-      <label class="relative inline-flex items-center cursor-pointer">
-        <input type="checkbox" id="togglePlano" class="sr-only" />
-        <div class="w-14 h-7 bg-gray-300 rounded-full peer
-                    peer-checked:bg-blue-600 transition-colors duration-300"></div>
-        <div class="absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow-md
-                    transition-transform duration-300 peer-checked:translate-x-7"></div>
-      </label>
-      <span id="labelAnual" class="transition-colors duration-300 cursor-pointer text-gray-500">Anual (10% off)</span>
-    </div>
+<!-- Toggle Mensal / Anual -->
+<div class="flex justify-center items-center mb-6 space-x-4 font-semibold select-none">
+  <span id="labelMensal" class="transition-colors duration-300 cursor-pointer text-blue-600">Mensal</span>
+
+  <label class="relative inline-flex items-center cursor-pointer w-14 h-7">
+    <input type="checkbox" id="togglePlano" class="sr-only peer" />
+    <div class="w-full h-full bg-gray-300 rounded-full transition-colors duration-300 peer-checked:bg-blue-600"></div>
+    <div class="absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:translate-x-7"></div>
+  </label>
+
+  <span id="labelAnual" class="transition-colors duration-300 cursor-pointer text-gray-500">Anual (10% off)</span>
+</div>
 
     <div id="planos" class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Planos renderizados aqui -->
@@ -55,7 +63,7 @@
     const planos = [
       {
         id: "free",
-        nome: "Free",
+        nome: "Plano Basic",
         precoMensal: 0,
         beneficios: [
           "Acesso limitado",
@@ -65,7 +73,7 @@
       },
       {
         id: "premium",
-        nome: "Premium",
+        nome: "Plano Premium",
         precoMensal: 29.9,
         beneficios: [
           "Acesso ilimitado",
@@ -76,7 +84,7 @@
       },
       {
         id: "pro",
-        nome: "Pro",
+        nome: "Plano Pro",
         precoMensal: 59.9,
         beneficios: [
           "Tudo do Premium",
@@ -155,27 +163,31 @@
 
     // Salva plano no localStorage após confirmação
     btnConfirmar.onclick = () => {
-      if (!planoSelecionadoId) return;
+  if (!planoSelecionadoId) return;
 
-      const plano = planos.find(p => p.id === planoSelecionadoId);
-      if (!plano) return alert("Plano inválido!");
+  const plano = planos.find(p => p.id === planoSelecionadoId);
+  if (!plano) return alert("Plano inválido!");
 
-      const preco = planoAnual
-        ? formatarPreco(precoAnual(plano.precoMensal)) + " / ano"
-        : formatarPreco(plano.precoMensal) + " / mês";
+  const preco = planoAnual
+    ? formatarPreco(precoAnual(plano.precoMensal)) + " / ano"
+    : formatarPreco(plano.precoMensal) + " / mês";
 
-      const dadosSalvar = {
-        id: plano.id,
-        nome: plano.nome,
-        beneficios: plano.beneficios,
-        preco: preco,
-        periodo: planoAnual ? "Anual (10% off)" : "Mensal"
-      };
+  const dadosSalvar = {
+    id: plano.id,
+    nome: plano.nome,
+    beneficios: plano.beneficios,
+    preco: preco,
+    periodo: planoAnual ? "Anual (10% off)" : "Mensal"
+  };
 
-      localStorage.setItem("planoUsuario", JSON.stringify(dadosSalvar));
-      mostrarPlanoAtual();
-      alert(`Plano "${plano.nome}" selecionado com sucesso.`);
-    };
+  // Salvar no planoUsuario para uso na própria página Planos.html
+  localStorage.setItem("planoUsuario", JSON.stringify(dadosSalvar));
+  
+  // Atualizar o perfil geral com o nome do plano (campo "plan")
+  salvarPlano(plano.nome);  // <-- chama a função que atualiza 'userProfile' no localStorage
+
+  mostrarPlanoAtual();
+};
 
     // Atualiza UI do toggle e cores dos labels
     function atualizarToggleUI() {
@@ -217,6 +229,22 @@
     mostrarPlanos();
     mostrarPlanoAtual();
     atualizarToggleUI();
+
+    function salvarPlano(planoSelecionado) {
+  // Obter perfil salvo
+  let perfil = JSON.parse(localStorage.getItem('userProfile')) || {};
+
+  // Atualizar o plano
+  perfil.plan = planoSelecionado;
+
+  // Salvar novamente
+  localStorage.setItem('userProfile', JSON.stringify(perfil));
+
+  // Opcional: disparar evento para outras abas/frames atualizarem
+  window.dispatchEvent(new Event('storage'));
+
+  alert("Plano atualizado com sucesso!");
+}
   </script>
 
 </body>

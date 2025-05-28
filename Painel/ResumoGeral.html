@@ -7,8 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="script.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
     <style>
         body {
@@ -142,19 +143,23 @@
     
 <!-- Perfil com dropdown estilizado -->
 <div class="relative" id="profileDropdown">
-    <button onclick="toggleDropdown()" class="mt-auto w-full focus:outline-none">
-        <div class="flex items-center space-x-3 p-3 hover:bg-blue-800 rounded-xl transition duration-200">
-            <div class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-            </div>
-            <div>
-                <p class="text-sm font-medium">João Silva</p>
-                <p class="text-xs opacity-70">Plano Premium</p>
-            </div>
-        </div>
-    </button>
+  <button onclick="toggleDropdown()" class="mt-auto w-full focus:outline-none">
+    <div class="flex items-center space-x-3 p-3 hover:bg-blue-800 rounded-xl transition duration-200">
+
+      <!-- Imagem de perfil -->
+      <div class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center overflow-hidden">
+        <img id="resumoFoto" src="https://via.placeholder.com/100" alt="Foto de perfil" class="w-full h-full object-cover" />
+      </div>
+
+      <!-- Nome e plano fixos ao lado -->
+      <div class="flex flex-col justify-center min-w-0">
+        <p id="resumoNome" class="text-sm font-medium truncate">João Silva</p>
+        <p id="resumoPlano" class="text-xs opacity-70 truncate">Plano Premium</p>
+      </div>
+
+    </div>
+  </button>
+
 
     <!-- Dropdown estilizado -->
     <div id="dropdownMenu" class="absolute bottom-16 left-3 w-56 bg-white rounded-xl shadow-xl hidden z-50 py-2 border border-gray-100">
@@ -245,19 +250,36 @@
                     </div>
                 </div>
                 
-<!-- Dashboard de Gráficos -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-    <!-- Gráfico de Estudos -->
-    <div class="bg-white rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-medium text-gray-800 mb-4">Estudos Semanais</h3>
-        <canvas id="graficoEstudos" class="grafico-pequeno"></canvas>
-    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
-    <!-- Gráfico de Despesas -->
-    <div class="bg-white rounded-xl shadow-md p-6">
-        <h3 class="text-lg font-medium text-gray-800 mb-4">Despesas Mensais</h3>
-        <canvas id="graficoInvestimentos" class="grafico-pequeno"></canvas>
+                    <!-- Gráfico de Estudos -->
+                    <div class="w-full bg-white rounded-xl shadow-md p-6 flex flex-col">
+                      <h3 class="text-xl font-semibold text-blue-600 mb-5 border-b-2 border-blue-600 w-max pb-1">
+                        Estudos Semanais
+                      </h3>
+                      <div class="w-full">
+                        <canvas id="graficoEstudos" style="width: 100%; height: 300px;"></canvas>
+                      </div>
+                    </div>
+                  
+
+  
+<!-- Cronômetro de Estudos (Espaço Ampliado) -->
+<div class="bg-white rounded-xl shadow-md p-8 flex flex-col items-center justify-center h-full">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Controle de Estudo</h3>
+  
+    <h4 class="text-lg font-semibold text-gray-700 mb-2 text-center">Tempo de Estudo</h4>
+    <p id="tempoEstudo" class="text-5xl font-mono text-blue-600 mb-6 text-center">00:00:00</p>
+  
+    <div class="flex space-x-6">
+      <button onclick="iniciarEstudo()" class="bg-green-500 text-white text-lg px-6 py-3 rounded-xl hover:bg-green-600 transition">
+        Iniciar
+      </button>
+      <button onclick="pararEstudo()" class="bg-red-500 text-white text-lg px-6 py-3 rounded-xl hover:bg-red-600 transition">
+        Parar
+      </button>
     </div>
+  </div>
 </div>
 
                
@@ -1277,5 +1299,160 @@
         </div> <!-- /mb-6 -->
     </div> <!-- /bg-white -->
 </div> <!-- /tab-carreira -->
+
+<script>
+  let cronometroInterval;
+  let segundosTotais = 0;
+  let tempoHoje = 0;
+  const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const estudoSemanal = new Array(7).fill(0); // em segundos
+
+  const tempoEstudo = document.getElementById("tempoEstudo");
+
+  function formatarTempo(segundos) {
+    const horas = Math.floor(segundos / 3600).toString().padStart(2, '0');
+    const minutos = Math.floor((segundos % 3600) / 60).toString().padStart(2, '0');
+    const seg = (segundos % 60).toString().padStart(2, '0');
+    return `${horas}:${minutos}:${seg}`;
+  }
+
+  function atualizarDisplay() {
+    tempoEstudo.textContent = formatarTempo(segundosTotais);
+  }
+
+  function iniciarEstudo() {
+    if (cronometroInterval) return;
+    cronometroInterval = setInterval(() => {
+      segundosTotais++;
+      tempoHoje++;
+      atualizarDisplay();
+    }, 1000);
+  }
+
+  function pararEstudo() {
+    clearInterval(cronometroInterval);
+    cronometroInterval = null;
+
+    const diaIndex = new Date().getDay();
+    estudoSemanal[diaIndex] += tempoHoje;
+    tempoHoje = 0;
+    segundosTotais = 0;
+    atualizarDisplay();
+    atualizarGrafico();
+  }
+
+  const ctx = document.getElementById('graficoEstudos').getContext('2d');
+
+// Gradiente para deixar o gráfico mais bonito
+const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)');   // Azul principal
+gradient.addColorStop(1, 'rgba(59, 130, 246, 0.3)');   // Azul mais claro
+
+const graficoEstudos = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+    // Exemplo de dados em minutos (0 a 300)
+    data: [0, 90, 120, 30, 180, 150, 60],
+    datasets: [{
+      label: 'Minutos de Estudo',
+      data: [0, 90, 120, 30, 180, 150, 60],
+      backgroundColor: gradient,
+      borderRadius: 12,
+      barThickness: 40,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: 10 },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1E3A8A',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#60A5FA',
+        borderWidth: 1,
+        callbacks: {
+          label: ctx => `${ctx.parsed.y} minutos`
+        }
+      },
+      datalabels: {
+        anchor: 'end',
+        align: 'start',
+        offset: -12,
+        color: '#1E3A8A',
+        font: { weight: 'bold', size: 14 },
+        formatter: value => value ? `${value} min` : '',
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 300, // 5 horas em minutos
+        ticks: {
+          stepSize: 60, // incrementa a cada 60 minutos (1h)
+          color: '#6B7280',
+          callback: val => {
+            if(val === 0) return '0';
+            return `${val / 60}h`; // mostra como horas no eixo
+          }
+        },
+        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+      },
+      x: {
+        ticks: { color: '#374151', font: { weight: 'bold' } },
+        grid: { display: false }
+      }
+    },
+    animation: { duration: 1000, easing: 'easeOutQuart' }
+  },
+  plugins: [ChartDataLabels]
+});
+  
+  function atualizarGrafico() {
+    graficoEstudos.data.datasets[0].data = estudoSemanal.map(s => s / 3600);
+    graficoEstudos.update();
+  }
+    
+
+    function carregarResumoPerfil() {
+  const savedProfile = localStorage.getItem('userProfile');
+  if (!savedProfile) return;
+
+  const perfil = JSON.parse(savedProfile);
+
+  if (perfil.photo) {
+    const fotoElem = document.getElementById('resumoFoto');
+    if (fotoElem) fotoElem.src = perfil.photo;
+  }
+
+  if (perfil.name) {
+    const nomeElem = document.getElementById('resumoNome');
+    if (nomeElem) nomeElem.textContent = perfil.name;
+  }
+}
+
+// Atualiza na carga da página
+window.addEventListener('DOMContentLoaded', carregarResumoPerfil);
+
+// Atualiza ao receber evento storage (quando salvo em outra aba/janela)
+window.addEventListener('storage', (event) => {
+  if (event.key === 'userProfile') {
+    carregarResumoPerfil();
+  }
+});
+document.addEventListener("DOMContentLoaded", () => {
+    const userProfile = JSON.parse(localStorage.getItem("userProfile"));
+
+    if (userProfile && userProfile.plan) {
+      const planoElement = document.getElementById("resumoPlano");
+      if (planoElement) {
+        planoElement.textContent = userProfile.plan;
+      }
+    }
+  });
+</script>
             </body>
         </html>
